@@ -29,7 +29,7 @@ exports.esbuild = function * (task) {
 
 [Word Counter "stupid" with React](https://github.com/ivanheral/count_word_stupid)
 
-[Counter with Vue 3](https://https://github.com/ivanheral/counter_vue3_esbuild)
+[Counter with Vue 3](https://github.com/ivanheral/counter_vue3_esbuild)
 
 ## Support
 

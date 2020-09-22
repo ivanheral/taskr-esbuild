@@ -1,6 +1,6 @@
 {
   "name": "taskr-esbuild",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Esbuild plugin for Taskr",
   "repository": {
     "type": "git",
