@@ -5,8 +5,9 @@
 ## Explanation
 
 - **🐣 The smallest toolchain for web development**: Only 7 MB (node_modules folder).
-- **👏 Library Support**: Vue, React and Preact (.vue file not supported).
-- **🎨 Import CSS**: supports basic CSS imports inside of JavaScript files.
+- **👏 Library Support**: Vue 3, React and Preact (.vue file not supported).
+- **🎨 Import Styles**: supports basic (css/less/sass/stylus) imports inside of JavaScript files.
+- **🖼️ Import Images & JSON**: supports basic (jpg/png/gif/webp/svg/bmp) imports inside of JavaScript files.
 
 ## Install
 
@@ -24,9 +25,11 @@ exports.esbuild = function * (task) {
 }
 ```
 
-## Example
+## Examples
 
 [Word Counter "stupid" with React](https://github.com/ivanheral/count_word_stupid)
+
+[Counter with Vue 3](https://https://github.com/ivanheral/counter_vue3_esbuild)
 
 ## Support
 

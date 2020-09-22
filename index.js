@@ -1,19 +1,12 @@
 'use strict';
 var NAME = "esbuild";
-var t = require("esbuild");
 const {
-	extname
-} = require("path");
-const {
-	getDependence,
-	add_h,
-	change_jsx,
-	add_styles,
-	css_REGEX,
-	styles_REGEX,
-	fw_REGEX,
-	import_REGEX
-} = require("./utils");
+	startService
+} = require("esbuild");
+const p = require("path");
+const fs = require("fs");
+const u = require("./esbuild/utils");
+const { Console } = require("console");
 var fw = "";
 var dependence = "";
 
@@ -36,12 +29,12 @@ function setError(ctx, msg) {
 
 // esBuild service
 let service = undefined;
-async function startService() {
+async function start() {
 	if (!service) {
-		service = await t.startService();
+		service = await startService();
 	}
 };
-const stopService = () => {
+const stop = () => {
 	if (service) {
 		service.stop();
 		service = undefined;
@@ -58,47 +51,55 @@ module.exports = function (task) {
 			for (const file of files) {
 				try {
 					// get file extension
-					var ext = extname(file.base).replace('.', '');
-					if (['js', 'jsx', 'ts', 'tsx', 'json'].includes(ext)) {
+					var ext = p.extname(file.base).replace('.', '');
+					if (u.files.includes(ext)) {
 						// change extension -> .js
-						file.base = file.base.replace(ext, 'js');
-						// add loader
-						opts["loader"] = ext;
-						// framework / dependences
-						file.data = file.data.toString().replace(fw_REGEX, function (...all) {
-							dependence = all[3];
-							// dependence is framework
-							if ((/(vue|react|preact)$/.test(dependence))) {
-								fw = dependence;
-							}
-							opts = change_jsx(fw, opts);
-							return getDependence(all[0], dependence);
-						});
-						// remove styles
-						file.data = file.data.toString().replace(styles_REGEX, function (...all) {
-							return '';
-						});
-						// replace extensions						
-						file.data = file.data.toString().replace(import_REGEX, function (...all) {
-							if (all[4]) {
-								return all[0].replace(`${all[3]}${all[4]}`, `${all[3]}.js`);
-							} else return all[0].replace(all[3], `${all[3]}.js`);
-						});
-						// add h (js, jsx, ts, tsx)
-						if (ext !== "json") {
-							file.data = `${add_h(fw)}
-						${file.data}`;
+						if (!u.imgs.includes(ext)) {
+							file.base = file.base.replace(ext, 'js');
 						}
-						// add css
-						file.data = file.data.toString().replace(css_REGEX, function (...all) {
-							return add_styles(all[2], file, all[3]);
-						});
+						// add loader
+						opts["loader"] = u.imgs.includes(ext) ? "text" : ext;
+						// add h (js, jsx, ts, tsx)
+						if (ext !== "json" && u.files.includes(ext)) {
+							// framework / dependences
+							file.data = file.data.toString().replace(u.fw_REGEX, function (...all) {
+								dependence = all[3];
+								// dependence is framework
+								if ((/(vue|react|preact)$/.test(dependence))) {
+									fw = dependence;
+								}
+								opts = u.change_jsx(fw, opts);
+								return u.getDependence(all[0], dependence);
+							});
+							// replace extensions						
+							file.data = file.data.toString().replace(u.import_REGEX, function (...all) {
+								return all[0].replace(`${all[3]}${all[5]}.${all[6]}`, `${all[3]}${all[5]}.js`);
+							});						
+
+							file.data = `${u.add_h(fw)}
+						${file.data}`;
+							// add styles
+							file.data = yield u.replaceAsync(file.data.toString(), u.css_REGEX, file);
+						}
+
 						// start
-						startService();
-						const result = t.transformSync(file.data.toString(), opts);
-						stopService();
+						yield start();
+						let text = file.data.toString()
+						if (u.imgs.includes(ext)) {
+							let path = file.dir.replace("/", "\\");
+							let image = p.resolve(process.cwd(), `${path}\\${file.base}`);
+							text = fs.readFileSync(image, {
+								encoding: 'base64'
+							});
+						}
+						const result = yield service.transform(text, opts);
+						stop();
 						if (ext === "json") {
-							result.js = result.js.replace("module.exports =", "export default");
+							result.js = result.js.replace('module.exports =', 'export default');
+						}
+						if (u.imgs.includes(ext)) {
+							result.js = result.js.replace('module.exports = "', `export default "data:image/${ext};base64,`);
+							file.base = file.base.replace(ext, 'js');
 						}
 						file.data = new Buffer(result.js);
 					}

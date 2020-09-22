@@ -1,20 +1,20 @@
 {
   "name": "taskr-esbuild",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Esbuild plugin for Taskr",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ivanheral/taskr-esbuild.git"
   },
   "license": "MIT",
-  "files": ["index.js","utils.js"],
+  "files": ["index.js","esbuild"],
     "scripts": {
     "tape": "npm install tape tap-spec",
     "test": "tape test/*.js | tap-spec"
   },
   "author": "Ivan Heral <ivanhernandezal@gmail.com>",
   "dependencies": {
-    "esbuild": "^0.6.30"
+    "esbuild": "^0.7.2"
   },
   "devDependencies": {
     "@taskr/clear": "^1.1.0",
