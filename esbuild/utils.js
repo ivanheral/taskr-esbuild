@@ -1,7 +1,5 @@
 // imports
-const {
-    resolve
-} = require("path");
+const p = require("path");
 // styles
 const st = require("./styles.js");
 // Frameworks
@@ -12,7 +10,8 @@ fw["preact"] = 'https://unpkg.com/preact?module';
 // REGEX
 const fw_REGEX = /[stn]*import[^stn]*(\w+|[{].*?[}])[\s\S]*?from[^stn]*(['"](\w+)['"])/igm;
 const import_REGEX = /[stn]*import[^stn]*(\w+|[{](.*?)[}])[^stn]*from[^stn]*['"](\.{1,1}\/|(\.{2,2}\/)*)(\S+)[.](ts|tsx|jsx|json|jpg|png|gif|webp|svg|bmp)['"]/igm;
-const css_REGEX = /[stn]*import[^stn]*(['"](.[\/]|..[\/])((.*?).(css|scss|less|styl))['"])/igm;
+const css_REGEX = /[stn]*import[^stn]*(['"](\.{1,1}\/|(\.{2,2}\/)*)(\S+[.](css|scss|less|styl))['"])/igm;
+const mod_REGEX = /[stn]*import[^stn]*\w+[^stn]*from[^stn]*['"](\.{1,1}\/|(\.{2,2}\/)*)(\S+)(.module.css)['"]/igm;
 // INCLUDES
 const files = ['js', 'jsx', 'ts', 'tsx', 'json', 'jpg', 'png', 'gif', 'webp', 'svg', 'bmp'];
 const imgs = ['jpg', 'png', 'gif', 'webp', 'svg', 'bmp'];
@@ -34,26 +33,27 @@ const getDependence = (line, dependence) => {
 const change_jsx = (fww, opts) => {
     return (fww === "vue" || fww === "preact") ? {
         ...opts,
-        jsxFactory: "h"        
+        jsxFactory: "h"
     } : opts;
 }
 
 // add css
 const add_styles = async (path, file, file_css, ext) => {
-    let name = file_css.replace(/[^a-zA-Z]+/g, '');
+    let name = Math.random().toString(36).replace('0.', '');
     let css = get_file(path, file, file_css);
     let content_css = await st.get_styles(css, ext);
     // test
-    return `let style${name} = document.createElement('style');\
-    style${name}.type = 'text/css';\
-    style${name}.appendChild(document.createTextNode('${content_css.trim()}'));\
-    document.head.appendChild(style${name})`;
+    return `let ${name} = document.createElement('style');\
+    ${name}.type = 'text/css';\
+    ${name}.appendChild(document.createTextNode('${content_css.trim()}'));\
+    document.head.appendChild(${name})`;
 }
 
 // get file
 const get_file = (path, file, file_) => {
-    let test = path.replace("/", "\\");
-    return resolve(process.cwd(), `${test}${file.dir}\\${file_}`);
+    let path_rel = path.replace(/\//g, "\\");
+    let path_folder = file.dir.replace(/\//g, "\\");
+    return p.resolve(`${process.cwd()}\\${path_folder}`, `${path_rel}\\${file_}`);
 }
 
 
@@ -61,7 +61,8 @@ const get_file = (path, file, file_) => {
 async function replaceAsync(str, regex, file) {
     const promises = [];
     str.replace(regex, (...all) => {
-        const promise = add_styles(all[2], file, all[3], all[5]);
+        // file: route, file, name, ext
+        const promise = add_styles(all[2], file, all[4], all[5]);
         promises.push(promise);
     });
     return Promise.all(promises).then(data => {

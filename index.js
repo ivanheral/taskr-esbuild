@@ -6,7 +6,6 @@ const {
 const p = require("path");
 const fs = require("fs");
 const u = require("./esbuild/utils");
-const { Console } = require("console");
 var fw = "";
 var dependence = "";
 
