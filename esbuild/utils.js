@@ -16,8 +16,8 @@ const mod_REGEX = /import\s+(\w+)[^stn]*from\s+['"](\.{1,1}\/|(\.{2,2}\/)*)(\S+[
 const files = ['js', 'jsx', 'ts', 'tsx', 'json', 'jpg', 'png', 'gif', 'webp', 'svg', 'bmp', 'vue'];
 const imgs = ['jpg', 'png', 'gif', 'webp', 'svg', 'bmp'];
 // Add h
-const add_h = (fww, ext) => {
-    return ((fww === "vue" || fww === "preact") && ext !== 'vue') ? `import { h } from "${fw[fww]}"` : '';
+const add_h = (fww) => {
+    return (fww === "vue" || fww === "preact") ? `import { h } from "${fw[fww]}"` : '';
 }
 
 // add dependence

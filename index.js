@@ -58,7 +58,7 @@ module.exports = function (task) {
 						if (ext !== "json" && u.files.includes(ext)) {
 							// framework / dependences
 							file.data = file.data.toString().replace(u.fw_REGEX, function (...all) {
-								dependence = all[2];
+								dependence = all[2].replace(/['"]+/g, '');
 								// dependence is framework
 								if ((/(vue|react|preact)$/.test(dependence))) {
 									fw = dependence;
@@ -71,7 +71,7 @@ module.exports = function (task) {
 								return all[0].replace(`${all[4]}${all[5]}`, `${all[4]}.js`);
 							});
 
-							file.data = `${u.add_h(fw, ext)}
+							file.data = `${u.add_h(fw)}
 						${file.data}`;
 							// add styles
 							file.data = yield u.replaceAsync(file.data.toString(), u.css_REGEX, file);
@@ -79,7 +79,7 @@ module.exports = function (task) {
 							file.data = yield u.replaceAsync(file.data.toString(), u.mod_REGEX, file);
 						}
 
-						let text = file.data.toString();
+						let text = file.data.toString();						
 						if (u.imgs.includes(ext)) {
 							let path = file.dir.replace("/", "\\");
 							let image = p.resolve(process.cwd(), `${path}\\${file.base}`);
@@ -87,7 +87,6 @@ module.exports = function (task) {
 								encoding: 'base64'
 							});
 						}
-
 						const result = yield require('esbuild').transform(text, opts["esbuild"]);
 
 
